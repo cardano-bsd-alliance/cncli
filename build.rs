@@ -1,6 +1,6 @@
-use std::process::Command;
-use std::path::Path;
 use std::env;
+use std::path::Path;
+use std::process::Command;
 
 macro_rules! ok (($expression:expr) => ($expression.unwrap()));
 macro_rules! log {
@@ -10,29 +10,35 @@ macro_rules! log {
 }
 
 fn main() {
-    // Build and link IOHK libsodium
-    //run("git", |command| {
-    //    command
-    //        .arg("submodule")
-    //        .arg("update")
-    //        .arg("--init")
-    //        .arg("--recursive")
-    //        .arg("--force")
-    //    });
-
-    // Build libsodium automatically (as part of rust build)
     #[cfg(not(feature = "libsodium-sys"))]
     {
-        let dir = env::var("SODIUM_LIB_DIR").unwrap();
-        println!("cargo:rustc-link-search=native={}", Path::new(&dir).join("lib").display());
-        println!("cargo:rustc-link-lib=static=sodium");
+        // Use set libsodium env path
+        if env::var("SODIUM_LIB_DIR").is_ok() {
+            let libdir = env::var("SODIUM_LIB_DIR").unwrap();
+            println!("cargo:rustc-link-search=native={}", Path::new(&libdir).join("lib").display());
+            println!("cargo:rustc-link-lib=static=sodium");
+        } else {
+            // Build and link IOHK libsodium
+            run("git", |command| {
+                command
+                    .arg("submodule")
+                    .arg("update")
+                    .arg("--init")
+                    .arg("--recursive")
+                    .arg("--force")
+            });
+            // Build libsodium automatically (as part of rust build)
+            let libsodium = autotools::Config::new("contrib/libsodium/").reconf("-vfi").build();
+            println!("cargo:rustc-link-search=native={}", libsodium.join("lib").display());
+            println!("cargo:rustc-link-lib=static=sodium");
+        }
     }
-
+    
     // Link with libsodium system library
-    //#[cfg(feature = "libsodium-sys")]
-    //{
-    //    pkg_config::Config::new().probe("libsodium").unwrap();
-    //}
+    #[cfg(feature = "libsodium-sys")]
+    {
+        pkg_config::Config::new().probe("libsodium").unwrap();
+    }
 
     println!("cargo:return-if-changed=build.rs");
 }
