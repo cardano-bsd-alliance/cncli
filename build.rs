@@ -7,16 +7,16 @@ macro_rules! log {
     line!(), $($arg)*));
 }
 
-fn main() {
+//fn main() {
     // Build and link IOHK libsodium
-    run("git", |command| {
-        command
-            .arg("submodule")
-            .arg("update")
-            .arg("--init")
-            .arg("--recursive")
-            .arg("--force")
-    });
+    //run("git", |command| {
+    //    command
+    //        .arg("submodule")
+    //        .arg("update")
+    //        .arg("--init")
+    //        .arg("--recursive")
+    //        .arg("--force")
+//    });
 
     // Build libsodium automatically (as part of rust build)
     #[cfg(not(feature = "libsodium-sys"))]
