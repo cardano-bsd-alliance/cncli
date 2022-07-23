@@ -1,4 +1,6 @@
 use std::process::Command;
+use std::path::Path;
+use std::env;
 
 macro_rules! ok (($expression:expr) => ($expression.unwrap()));
 macro_rules! log {
@@ -19,18 +21,18 @@ fn main() {
     //    });
 
     // Build libsodium automatically (as part of rust build)
-    //#[cfg(not(feature = "libsodium-sys"))]
-    //{
-    //    let libsodium = autotools::Config::new("contrib/libsodium/").reconf("-vfi").build();
-    //    println!("cargo:rustc-link-search=native={}", libsodium.join("lib").display());
-    //    println!("cargo:rustc-link-lib=static=sodium");
-    //}
+    #[cfg(not(feature = "libsodium-sys"))]
+    {
+        let dir = env::var("SODIUM_LIB_DIR").unwrap();
+        println!("cargo:rustc-link-search=native={}", Path::new(&dir).join("lib").display());
+        println!("cargo:rustc-link-lib=static=sodium");
+    }
 
     // Link with libsodium system library
-    #[cfg(feature = "libsodium-sys")]
-    {
-        pkg_config::Config::new().probe("libsodium").unwrap();
-    }
+    //#[cfg(feature = "libsodium-sys")]
+    //{
+    //    pkg_config::Config::new().probe("libsodium").unwrap();
+    //}
 
     println!("cargo:return-if-changed=build.rs");
 }
