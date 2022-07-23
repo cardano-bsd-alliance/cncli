@@ -52,4 +52,5 @@ autotools = "0.2"
 pkg-config = "0.3.16"
 
 [features]
+default = ["libsodium-sys"]
 libsodium-sys = []
