@@ -7,7 +7,7 @@ macro_rules! log {
     line!(), $($arg)*));
 }
 
-//fn main() {
+fn main() {
     // Build and link IOHK libsodium
     //run("git", |command| {
     //    command
